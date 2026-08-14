@@ -2,11 +2,16 @@
 
 name: Pull Request - Validate
 
-
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize]
   workflow_dispatch:
+    inputs:
+      local-only:
+        description: 'Run only on local environment'
+        type: boolean
+        required: true
+        default: true
     
 concurrency:
   group: pr-${{ github.event.pull_request.number || github.ref }}
@@ -20,11 +25,15 @@ permissions:
 jobs:
   dev:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    name: "[DEV]"
-    uses: faccomichele-org/gha-reusables/.github/workflows/terraform-run.yml@main
+    name: "[DEV - ${{ matrix.environment_prefix }}]"
+    strategy:
+      matrix:
+        environment_prefix: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs['local-only'] == true && '["local"]' || vars['ENVIRONMENT_PREFIXES_JSON'] || '[""]') }}
+    uses: faccomichele/gha-reusables/.github/workflows/terraform-run.yml@main
     with:
       environment: 'dev'
-      region: 'eu-central-1'
+      region: 'us-east-1'
       working-directory: '.'
+      environment-prefix: ${{ matrix.environment_prefix }}
       action: 'plan'
     secrets: inherit
