@@ -34,7 +34,6 @@ jobs:
     with:
       environment: 'dev'
       region: 'us-east-1'
-      global: true
       working-directory: '.'
       environment-prefix: ${{ matrix.environment_prefix }}
       action: 'apply'
