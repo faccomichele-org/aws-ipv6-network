@@ -8,6 +8,10 @@ locals {
   flow_logs_transition_ia_days = local.environment == "prod" ? 30 : 0
   flow_logs_transition_glacier_days = local.environment == "prod" ? 90 : 0
 
+  flow_logs_retention_days = local.environment == "prod" ? 365 : 7
+  flow_logs_transition_ia_days = local.environment == "prod" ? 30 : 0
+  flow_logs_transition_glacier_days = local.environment == "prod" ? 90 : 0
+
   public_subnets = {
     for index, az in local.selected_azs : az => {
       az              = az
