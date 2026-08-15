@@ -194,29 +194,26 @@ resource "aws_glue_catalog_table" "vpc_flow_logs" {
       name = "encryption_status"
       type = "int"
     }
-    columns {
-      name = "instance_tag"
-      type = "string"
+    dynamic "columns" {
+      for_each = range(length(lookup(var.flow_logs_tag_keys, "instance", [])))
+      content {
+        name = columns.value == 0 ? "instance_tag" : "instance_tag_2"
+        type = "string"
+      }
     }
-    columns {
-      name = "instance_tag_2"
-      type = "string"
+    dynamic "columns" {
+      for_each = range(length(lookup(var.flow_logs_tag_keys, "network-interface", [])))
+      content {
+        name = columns.value == 0 ? "interface_tag" : "interface_tag_2"
+        type = "string"
+      }
     }
-    columns {
-      name = "interface_tag"
-      type = "string"
-    }
-    columns {
-      name = "interface_tag_2"
-      type = "string"
-    }
-    columns {
-      name = "asg_tag"
-      type = "string"
-    }
-    columns {
-      name = "asg_tag_2"
-      type = "string"
+    dynamic "columns" {
+      for_each = range(length(lookup(var.flow_logs_tag_keys, "auto-scaling-group", [])))
+      content {
+        name = columns.value == 0 ? "asg_tag" : "asg_tag_2"
+        type = "string"
+      }
     }
     columns {
       name = "interface_type"

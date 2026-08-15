@@ -34,11 +34,21 @@ variable "enable_athena" {
 }
 
 variable "flow_logs_tag_keys" {
-  description = "Map of resource type to tag keys included in flow log records via the Amazon EC2 Tags feature"
+  description = "Map of resource type to tag keys included in flow log records via the Amazon EC2 Tags feature. The tag fields in the log format (and Athena table columns) are generated from this map: the first key maps to <resource>-tag and an optional second key to <resource>-tag-2"
   type        = map(list(string))
   default = {
     instance             = ["Name"]
     "network-interface"  = ["Name"]
     "auto-scaling-group" = ["Name"]
+  }
+
+  validation {
+    condition     = alltrue([for k in keys(var.flow_logs_tag_keys) : contains(["instance", "network-interface", "auto-scaling-group"], k)])
+    error_message = "flow_logs_tag_keys keys must be one of instance, network-interface, or auto-scaling-group."
+  }
+
+  validation {
+    condition     = alltrue([for v in values(var.flow_logs_tag_keys) : length(v) >= 1 && length(v) <= 2])
+    error_message = "Each resource type in flow_logs_tag_keys must have between 1 and 2 tag keys."
   }
 }
