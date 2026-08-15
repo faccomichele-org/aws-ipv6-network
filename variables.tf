@@ -33,30 +33,6 @@ variable "enable_athena" {
   default     = true
 }
 
-variable "logging_bucket_name" {
-  description = "Name of the S3 bucket for logs. Defaults to a generated unique name."
-  type        = string
-  default     = null
-}
-
-variable "flow_logs_retention_days" {
-  description = "Number of days to retain flow log objects in S3 before expiration"
-  type        = number
-  default     = 365
-}
-
-variable "flow_logs_transition_ia_days" {
-  description = "Days after which flow log objects transition to STANDARD_IA"
-  type        = number
-  default     = 30
-}
-
-variable "flow_logs_transition_glacier_days" {
-  description = "Days after which flow log objects transition to GLACIER_IR"
-  type        = number
-  default     = 90
-}
-
 variable "flow_logs_tag_keys" {
   description = "Map of resource type to tag keys included in flow log records via the Amazon EC2 Tags feature"
   type        = map(list(string))

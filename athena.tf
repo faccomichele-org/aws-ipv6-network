@@ -1,8 +1,3 @@
-locals {
-  athena_database_name  = "${replace(replace(lower(local.project_name), "-", "_"), ".", "_")}_logging"
-  athena_workgroup_name = "${replace(replace(lower(local.project_name), "_", "-"), ".", "-")}-logging"
-}
-
 resource "aws_glue_catalog_database" "logging" {
   count = var.enable_athena ? 1 : 0
 
