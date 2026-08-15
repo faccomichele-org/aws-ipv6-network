@@ -14,6 +14,10 @@ Terraform templates to deploy an AWS VPC designed for IPv6-native workloads:
   - internet ingress HTTPS only on public tier (+ ephemeral return traffic)
 - Default security group locked down (no rules)
 - Default network ACL locked down (no rules)
+- VPC Flow Logs to S3 (Parquet, per-hour hive-compatible partitions) with the full custom field set including ECS task metadata (`ecs-*`), resource tags (`instance-tag`, `interface-tag`, `asg-tag`), `traffic-path`, `encryption-status`, `reject-reason`, and `next-hop-*` fields
+- Route 53 Resolver query logging (VPC DNS logs) to the same S3 bucket
+- Athena workgroup + Glue database with pre-built `vpc_flow_logs` and `resolver_query_logs` tables (Parquet / JSON serde, hive-compatible partitions)
+- Optional GuardDuty detector (disabled by default)
 
 > Note: AWS currently requires an IPv4 CIDR on the VPC itself. The template keeps it at the minimal `/28`, while all workload subnets are IPv6-native (no IPv4 CIDR on subnets).
 
@@ -23,7 +27,45 @@ Terraform templates to deploy an AWS VPC designed for IPv6-native workloads:
 module "ipv6_network" {
   source = "./"
 
-  aws_region   = "eu-west-1"
-  project_name = "example-ipv6-network"
+  tags = {
+    Project = "example-ipv6-network"
+  }
 }
 ```
+
+The environment and region are derived from the Terraform workspace name (`<environment>_<region>`, e.g. `dev_eu-west-1`).
+
+## Logging
+
+All logs are stored in a single S3 bucket (SSE-S3 encrypted, public access blocked, lifecycle: `STANDARD_IA` after 30 days, `GLACIER_IR` after 90 days, expiration after 365 days).
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `enable_flow_logs` | `true` | VPC Flow Logs to S3 in Parquet format |
+| `enable_resolver_query_logs` | `true` | Route 53 Resolver query logs |
+| `enable_guardduty` | `false` | GuardDuty detector (account-level resource) |
+| `enable_athena` | `true` | Athena workgroup + Glue tables |
+| `logging_bucket_name` | `null` | Override the generated bucket name |
+| `flow_logs_retention_days` | `365` | S3 object expiration |
+| `flow_logs_transition_ia_days` | `30` | Transition to `STANDARD_IA` |
+| `flow_logs_transition_glacier_days` | `90` | Transition to `GLACIER_IR` |
+| `flow_logs_tag_keys` | `{instance=[Name], network-interface=[Name], auto-scaling-group=[Name]}` | Tag keys included in flow log records |
+
+### Querying flow logs
+
+Run `MSCK REPAIR TABLE vpc_flow_logs` (and `resolver_query_logs`) once after the first logs are delivered to load the hive-compatible partitions, then query from the workgroup:
+
+```sql
+SELECT srcaddr, dstaddr, dstport, action, flow_direction, ecs_service_name
+FROM vpc_flow_logs
+WHERE action = 'REJECT' AND year = '2026' AND month = '08'
+LIMIT 100;
+```
+
+### Caveats
+
+- **ECS metadata fields** (`ecs-*`) are only populated for ECS tasks running in `awsvpc` network mode.
+- **Tag fields** (`instance-tag`, `asg-tag`, ...) require the auto-created "Flow Logs Amazon EC2 Tags" service-linked role. ASG tag values may be stale without an enabled CloudTrail trail in the account.
+- Flow log metadata fields are best-effort and may be missing (`-`) for traffic not associated with a tagged resource, ECS task, or supported ENI type.
+- **GuardDuty** is account-scoped, not VPC-scoped; creating it via this module in multiple workspaces will target the same account-level detector.
+- Metadata fields increase the volume of log data delivered, which increases cost. S3 + Parquet keeps storage and query costs low.

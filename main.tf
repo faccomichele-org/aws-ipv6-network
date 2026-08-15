@@ -14,7 +14,7 @@ resource "aws_vpc" "this" {
 
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
-  tags   = merge(local.tags,
+  tags = merge(local.tags,
     {
       Name = "${local.project_name}-igw"
       File = "main.tf"
@@ -24,7 +24,7 @@ resource "aws_internet_gateway" "this" {
 
 resource "aws_egress_only_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
-  tags   = merge(local.tags,
+  tags = merge(local.tags,
     {
       Name = "${local.project_name}-eigw"
       File = "main.tf"
@@ -36,12 +36,12 @@ resource "aws_egress_only_internet_gateway" "this" {
 resource "aws_subnet" "public" {
   for_each = local.public_subnets
 
-  vpc_id                                          = aws_vpc.this.id
-  availability_zone                               = each.value.az
-  ipv6_cidr_block                                 = each.value.ipv6_cidr_block
-  ipv6_native                                     = true
-  assign_ipv6_address_on_creation                 = true
-  enable_resource_name_dns_aaaa_record_on_launch  = true
+  vpc_id                                         = aws_vpc.this.id
+  availability_zone                              = each.value.az
+  ipv6_cidr_block                                = each.value.ipv6_cidr_block
+  ipv6_native                                    = true
+  assign_ipv6_address_on_creation                = true
+  enable_resource_name_dns_aaaa_record_on_launch = true
 
   tags = merge(local.tags,
     {
@@ -55,12 +55,12 @@ resource "aws_subnet" "public" {
 resource "aws_subnet" "private" {
   for_each = local.private_subnets
 
-  vpc_id                                          = aws_vpc.this.id
-  availability_zone                               = each.value.az
-  ipv6_cidr_block                                 = each.value.ipv6_cidr_block
-  ipv6_native                                     = true
-  assign_ipv6_address_on_creation                 = true
-  enable_resource_name_dns_aaaa_record_on_launch  = true
+  vpc_id                                         = aws_vpc.this.id
+  availability_zone                              = each.value.az
+  ipv6_cidr_block                                = each.value.ipv6_cidr_block
+  ipv6_native                                    = true
+  assign_ipv6_address_on_creation                = true
+  enable_resource_name_dns_aaaa_record_on_launch = true
 
   tags = merge(local.tags,
     {
@@ -73,7 +73,7 @@ resource "aws_subnet" "private" {
 
 resource "aws_default_security_group" "this" {
   vpc_id = aws_vpc.this.id
-  tags   = merge(local.tags,
+  tags = merge(local.tags,
     {
       Name = "${local.project_name}-default-sg-locked"
       File = "main.tf"

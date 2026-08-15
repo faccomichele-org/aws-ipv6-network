@@ -1,7 +1,7 @@
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
-  tags   = merge(local.tags,
+  tags = merge(local.tags,
     {
       Name = "${local.project_name}-public-rt"
       File = "routing.tf"
@@ -24,7 +24,7 @@ resource "aws_route_table_association" "public" {
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
-  tags   = merge(local.tags,
+  tags = merge(local.tags,
     {
       Name = "${local.project_name}-private-rt"
       File = "routing.tf"
