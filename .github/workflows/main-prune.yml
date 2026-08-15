@@ -17,7 +17,7 @@ permissions:
   contents: read
       
 concurrency:
-  group: pr-${{ github.ref }}
+  group: prune
   cancel-in-progress: true
 
 jobs:

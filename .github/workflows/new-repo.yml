@@ -10,7 +10,7 @@ permissions:
   issues: write
       
 concurrency:
-  group: unique
+  group: new-repo
   cancel-in-progress: true
 
 jobs:

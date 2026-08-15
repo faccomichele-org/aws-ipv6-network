@@ -65,7 +65,7 @@ LIMIT 100;
 ### Caveats
 
 - **ECS metadata fields** (`ecs-*`) are only populated for ECS tasks running in `awsvpc` network mode.
-- **Tag fields** (`instance-tag`, `asg-tag`, ...) require the auto-created "Flow Logs Amazon EC2 Tags" service-linked role. ASG tag values may be stale without an enabled CloudTrail trail in the account.
+- **Tag fields** (`instance-tag`, `asg-tag`, ...) require the auto-created "Flow Logs Amazon EC2 Tags" service-linked role. ASG tag values may be stale without an enabled CloudTrail trail in the account. The tag fields in the log format (and the corresponding Athena table columns) are generated from `flow_logs_tag_keys`: one key per resource type adds `<resource>-tag`, a second key adds `<resource>-tag-2`.
 - Flow log metadata fields are best-effort and may be missing (`-`) for traffic not associated with a tagged resource, ECS task, or supported ENI type.
 - **GuardDuty** is account-scoped, not VPC-scoped; creating it via this module in multiple workspaces will target the same account-level detector.
 - Metadata fields increase the volume of log data delivered, which increases cost. S3 + Parquet keeps storage and query costs low.
