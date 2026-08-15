@@ -1,6 +1,6 @@
 resource "aws_network_acl" "public" {
   vpc_id = aws_vpc.this.id
-  tags   = merge(local.tags,
+  tags = merge(local.tags,
     {
       Name = "${local.project_name}-public-nacl"
       File = "nacls.tf"
@@ -17,7 +17,7 @@ resource "aws_network_acl_association" "public" {
 
 resource "aws_network_acl" "private" {
   vpc_id = aws_vpc.this.id
-  tags   = merge(local.tags,
+  tags = merge(local.tags,
     {
       Name = "${local.project_name}-private-nacl"
       File = "nacls.tf"
