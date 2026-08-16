@@ -1,7 +1,9 @@
 locals {
   environment  = split("_", terraform.workspace)[0]
   aws_region   = split("_", terraform.workspace)[1]
+  organization = var.tags["Organization"] != null ? var.tags["Organization"] : "unknown"
   project_name = var.tags["Project"] != null ? var.tags["Project"] : "unknown"
+  ssm_path     = "/${local.organization}/${local.project_name}/${local.environment}/"
   selected_azs = slice(data.aws_availability_zones.available.names, 0, 3)
 
   flow_logs_retention_days          = local.environment == "prod" ? 365 : 7
