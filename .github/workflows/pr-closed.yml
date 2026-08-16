@@ -1,0 +1,16 @@
+# This triggers on all clodes PRs
+
+name: Pull Request - Close All In-Progress Workflows
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  main:
+    name: "Cancel on PR Close"
+    uses: faccomichele/gha-reusables/.github/workflows/cancel-on-pr-close.yml@main
