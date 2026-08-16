@@ -11,7 +11,7 @@ on:
         description: 'Run only on local environment'
         type: boolean
         required: true
-        default: true
+        default: false
     
 concurrency:
   group: pr-${{ github.event.pull_request.number || github.ref }}

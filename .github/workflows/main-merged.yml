@@ -12,7 +12,7 @@ on:
         description: 'Run only on local environment'
         type: boolean
         required: true
-        default: true
+        default: false
 
 permissions:
   id-token: write
