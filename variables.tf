@@ -7,6 +7,16 @@ variable "vpc_cidr_block" {
   description = "The CIDR block for the VPC"
   type        = string
   default     = "10.0.0.0/24"
+
+  validation {
+    condition     = can(cidrnetmask(var.vpc_cidr_block))
+    error_message = "vpc_cidr_block must be a valid IPv4 CIDR block."
+  }
+
+  validation {
+    condition     = can(regex("/(1[6-9]|2[0-4])$", var.vpc_cidr_block))
+    error_message = "vpc_cidr_block must use a /16 through /24 prefix so three /26 service subnets can be allocated."
+  }
 }
 
 variable "enable_flow_logs" {

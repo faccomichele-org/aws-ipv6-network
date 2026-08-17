@@ -44,3 +44,26 @@ resource "aws_route_table_association" "private" {
   subnet_id      = each.value.id
   route_table_id = aws_route_table.private.id
 }
+
+resource "aws_route_table" "services" {
+  vpc_id = aws_vpc.this.id
+  tags = merge(local.tags,
+    {
+      Name = "${local.project_name}-services-rt"
+      File = "routing.tf"
+    }
+  )
+}
+
+resource "aws_route" "services_egress" {
+  route_table_id              = aws_route_table.services.id
+  destination_ipv6_cidr_block = "::/0"
+  egress_only_gateway_id      = aws_egress_only_internet_gateway.this.id
+}
+
+resource "aws_route_table_association" "services" {
+  for_each = aws_subnet.services
+
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.services.id
+}
