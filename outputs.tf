@@ -17,3 +17,8 @@ output "private_subnet_ids" {
   description = "IDs of the three private IPv6-native subnets."
   value       = aws_ssm_parameter.private_subnet_ids.name
 }
+
+output "services_subnet_ids" {
+  description = "IDs of the three dual-stack service subnets."
+  value       = aws_ssm_parameter.services_subnet_ids.name
+}

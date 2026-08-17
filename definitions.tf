@@ -1,10 +1,11 @@
 locals {
-  environment  = split("_", terraform.workspace)[0]
-  aws_region   = split("_", terraform.workspace)[1]
-  organization = var.tags["Organization"] != null ? var.tags["Organization"] : "unknown"
-  project_name = var.tags["Project"] != null ? var.tags["Project"] : "unknown"
-  ssm_path     = "/${local.organization}/${local.project_name}/${local.environment}/"
-  selected_azs = slice(data.aws_availability_zones.available.names, 0, 3)
+  environment          = split("_", terraform.workspace)[0]
+  aws_region           = split("_", terraform.workspace)[1]
+  organization         = var.tags["Organization"] != null ? var.tags["Organization"] : "unknown"
+  project_name         = var.tags["Project"] != null ? var.tags["Project"] : "unknown"
+  ssm_path             = "/${local.organization}/${local.project_name}/${local.environment}/"
+  selected_azs         = slice(data.aws_availability_zones.available.names, 0, 3)
+  service_ipv4_newbits = 26 - tonumber(split("/", var.vpc_cidr_block)[1])
 
   flow_logs_retention_days          = local.environment == "prod" ? 365 : 7
   flow_logs_transition_ia_days      = local.environment == "prod" ? 30 : 0
@@ -21,6 +22,14 @@ locals {
     for index, az in local.selected_azs : az => {
       az              = az
       ipv6_cidr_block = cidrsubnet(aws_vpc.this.ipv6_cidr_block, 8, index + 3)
+    }
+  }
+
+  services_subnets = {
+    for index, az in local.selected_azs : az => {
+      az              = az
+      cidr_block      = cidrsubnet(var.vpc_cidr_block, local.service_ipv4_newbits, index)
+      ipv6_cidr_block = cidrsubnet(aws_vpc.this.ipv6_cidr_block, 8, index + 6)
     }
   }
 

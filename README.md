@@ -4,9 +4,11 @@ Terraform templates to deploy an AWS VPC designed for IPv6-native workloads:
 
 - AWS-assigned IPv6 CIDR block on the VPC
 - 3 public + 3 private IPv6-native subnets (`/64`, minimal IPv6 subnet size in AWS)
-- Dedicated route table for public and private tiers
+- 3 dual-stack service subnets (`/26` IPv4 + `/64` IPv6), one per availability zone
+- Dedicated route table for public, private, and services tiers
 - Public internet routing through an Internet Gateway
 - Private egress-only internet routing through an Egress-Only Internet Gateway
+- Services egress-only IPv6 internet routing through an Egress-Only Internet Gateway, with no IPv4 internet route or NAT Gateway
 - Dedicated NACL per tier with:
   - free VPC-internal communications
   - internet egress limited to HTTPS (`443`) and SSH (`22`)
@@ -19,7 +21,9 @@ Terraform templates to deploy an AWS VPC designed for IPv6-native workloads:
 - Athena workgroup + Glue database with pre-built `vpc_flow_logs` and `resolver_query_logs` tables (Parquet / JSON serde, hive-compatible partitions)
 - Optional GuardDuty detector (disabled by default)
 
-> Note: AWS currently requires an IPv4 CIDR on the VPC itself. The template keeps it at the minimal `/28`, while all workload subnets are IPv6-native (no IPv4 CIDR on subnets).
+> Note: AWS requires an IPv4 CIDR on the VPC itself. The default `/24` VPC CIDR provides three `/26` IPv4 ranges for the dual-stack service subnets; use a VPC CIDR with a `/16` through `/24` prefix. Public and private subnets remain IPv6-native and do not receive IPv4 CIDRs.
+
+Service subnets have IPv4 and IPv6 addresses for workloads that require both address families. Their route table has an IPv6 `::/0` route through the egress-only internet gateway, but no IPv4 `0.0.0.0/0` route. IPv4 traffic is limited to automatic VPC-local routing, so no NAT Gateway is provisioned.
 
 ## Usage
 

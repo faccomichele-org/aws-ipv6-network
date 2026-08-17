@@ -71,6 +71,27 @@ resource "aws_subnet" "private" {
   )
 }
 
+resource "aws_subnet" "services" {
+  for_each = local.services_subnets
+
+  vpc_id                                         = aws_vpc.this.id
+  availability_zone                              = each.value.az
+  cidr_block                                     = each.value.cidr_block
+  ipv6_cidr_block                                = each.value.ipv6_cidr_block
+  ipv6_native                                    = false
+  assign_ipv6_address_on_creation                = true
+  enable_resource_name_dns_aaaa_record_on_launch = true
+  map_public_ip_on_launch                        = false
+
+  tags = merge(local.tags,
+    {
+      Name = "${local.project_name}-services-${each.key}"
+      File = "main.tf"
+      Tier = "services"
+    }
+  )
+}
+
 resource "aws_default_security_group" "this" {
   vpc_id = aws_vpc.this.id
   tags = merge(local.tags,
