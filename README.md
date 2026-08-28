@@ -11,7 +11,7 @@ Terraform templates to deploy an AWS VPC designed for IPv6-native workloads:
 - Services egress-only IPv6 internet routing through an Egress-Only Internet Gateway, with no IPv4 internet route or NAT Gateway
 - Dedicated NACL per tier with:
   - free VPC-internal communications
-  - internet egress limited to HTTPS (`443`) and SSH (`22`)
+  - private-tier internet egress limited to HTTPS (`443`), SSH (`22`), TCP/UDP (`7844`), and TCP (`5432`)
   - ephemeral return traffic rules
   - internet ingress HTTPS only on public tier (+ ephemeral return traffic)
 - Default security group locked down (no rules)

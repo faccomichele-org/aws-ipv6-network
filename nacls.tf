@@ -125,6 +125,17 @@ resource "aws_network_acl_rule" "private_ingress_ephemeral" {
   to_port         = 65535
 }
 
+resource "aws_network_acl_rule" "private_ingress_udp_ephemeral" {
+  network_acl_id  = aws_network_acl.private.id
+  rule_number     = 120
+  egress          = false
+  protocol        = "17"
+  rule_action     = "allow"
+  ipv6_cidr_block = "::/0"
+  from_port       = 1024
+  to_port         = 65535
+}
+
 resource "aws_network_acl_rule" "private_egress_vpc" {
   network_acl_id  = aws_network_acl.private.id
   rule_number     = 100
@@ -156,6 +167,39 @@ resource "aws_network_acl_rule" "private_egress_ssh" {
   to_port         = 22
 }
 
+resource "aws_network_acl_rule" "private_egress_7844_tcp" {
+  network_acl_id  = aws_network_acl.private.id
+  rule_number     = 130
+  egress          = true
+  protocol        = "6"
+  rule_action     = "allow"
+  ipv6_cidr_block = "::/0"
+  from_port       = 7844
+  to_port         = 7844
+}
+
+resource "aws_network_acl_rule" "private_egress_7844_udp" {
+  network_acl_id  = aws_network_acl.private.id
+  rule_number     = 140
+  egress          = true
+  protocol        = "17"
+  rule_action     = "allow"
+  ipv6_cidr_block = "::/0"
+  from_port       = 7844
+  to_port         = 7844
+}
+
+resource "aws_network_acl_rule" "private_egress_5432_tcp" {
+  network_acl_id  = aws_network_acl.private.id
+  rule_number     = 150
+  egress          = true
+  protocol        = "6"
+  rule_action     = "allow"
+  ipv6_cidr_block = "::/0"
+  from_port       = 5432
+  to_port         = 5432
+}
+
 resource "aws_network_acl" "services" {
   vpc_id = aws_vpc.this.id
   tags = merge(local.tags,
@@ -174,12 +218,12 @@ resource "aws_network_acl_association" "services" {
 }
 
 resource "aws_network_acl_rule" "services_ingress_ipv4_vpc" {
-  network_acl_id  = aws_network_acl.services.id
-  rule_number     = 100
-  egress          = false
-  protocol        = "-1"
-  rule_action     = "allow"
-  cidr_block      = aws_vpc.this.cidr_block
+  network_acl_id = aws_network_acl.services.id
+  rule_number    = 100
+  egress         = false
+  protocol       = "-1"
+  rule_action    = "allow"
+  cidr_block     = aws_vpc.this.cidr_block
 }
 
 resource "aws_network_acl_rule" "services_ingress_ipv6_vpc" {
@@ -203,12 +247,12 @@ resource "aws_network_acl_rule" "services_ingress_ipv6_ephemeral" {
 }
 
 resource "aws_network_acl_rule" "services_egress_ipv4_vpc" {
-  network_acl_id  = aws_network_acl.services.id
-  rule_number     = 100
-  egress          = true
-  protocol        = "-1"
-  rule_action     = "allow"
-  cidr_block      = aws_vpc.this.cidr_block
+  network_acl_id = aws_network_acl.services.id
+  rule_number    = 100
+  egress         = true
+  protocol       = "-1"
+  rule_action    = "allow"
+  cidr_block     = aws_vpc.this.cidr_block
 }
 
 resource "aws_network_acl_rule" "services_egress_ipv6_vpc" {
